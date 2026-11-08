@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<!--
+  دليل تحديث الموقع (HOW TO UPDATE)
+  =================================
+  - لتغيير اسم المصنع، الشعار، أرقام الواتساب، وبيانات التواصل: قم بتعديل الكائن `CONFIG.brand` في بداية سكريبت الجافاسكريبت (أسفل الصفحة).
+  - لإضافة أو تعديل منتج: قم بتعديل مصفوفة `CONFIG.products`. جميع البطاقات تتولد تلقائياً.
+  - لتغيير صورة منتج (عينة): قم بتحديث الحقل `image` داخل كل منتج برابط الصورة الجديد.
+  - لإضافة مجسمات 3D (GLB) مستقبلاً: يمكنك ربط مكتبة مثل `model-viewer` واستبدال عنصر الصورة بها بناءً على حقل `model3D` في الـ CONFIG.
+  - لتأكيد وتفعيل خيارات الطباعة والتشطيب: قم بتعديل `CONFIG.printingOptions` و `CONFIG.finishingOptions` وتغيير `confirmed: true`.
+-->
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المصنع الفاخر | لحلول التغليف والكرتون</title>
+    
+    <!-- تحسينات محركات البحث (SEO) والمشاركة -->
+    <meta name="description" content="نصنع حلول التغليف والكرتون التي تحمي منتجاتك وتبرز هويتها. اكتشف الكتالوج واستخدم استوديو الصناديق التفاعلي لطلب عرض سعر.">
+    <meta property="og:title" content="المصنع الفاخر | لحلول التغليف والكرتون">
+    <meta property="og:description" content="حلول التغليف المبتكرة للمصانع والشركات. تصفح الكتالوج واطلب عرض سعر الآن.">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts: Noto Serif Arabic for elegant luxury typography, Tajawal for clean UI, JetBrains Mono for specs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Serif+Arabic:wght@300;400;500;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#F6F1E9',
+                        ivory: '#EDE3D5',
+                        kraft: '#C49A6C',
+                        cardboard: '#8A6A47',
+                        espresso: '#2B211B',
+                        ink: '#1B1713',
+                        copper: '#B77B4B',
+                        vermilion: '#D8431F',
+                        whatsapp: '#25D366'
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                        serif: ['Noto Serif Arabic', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'luxury': '0 10px 40px -10px rgba(43, 33, 27, 0.08)',
+                        'inner-kraft': 'inset 0 0 60px rgba(138, 106, 71, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles & Utility */
+        body { background-color: theme('colors.paper'); color: theme('colors.ink'); overflow-x: hidden; }
+        ::selection { background-color: theme('colors.copper'); color: theme('colors.paper'); }
+        
+        /* Custom Scrollbar for Luxury Feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: theme('colors.paper'); }
+        ::-webkit-scrollbar-thumb { background: theme('colors.kraft'); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.cardboard'); }
+
+        /* Hide scrollbar for category filters but allow scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Typography & Layout Polish */
+        .text-balance { text-wrap: balance; }
+        .lux-border { border: 1px solid rgba(138, 106, 71, 0.2); }
+        .lux-border-b { border-bottom: 1px solid rgba(138, 106, 71, 0.2); }
+        .glass-header { background: rgba(246, 241, 233, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(138, 106, 71, 0.1); }
+
+        /* CSS 3D Box Engine */
+        .scene-3d {
+            perspective: 2000px;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .box-pivot {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .box-pivot.spin { animation: slowSpin 30s linear infinite; }
+        @keyframes slowSpin { from { transform: rotateY(0deg) rotateX(-15deg); } to { transform: rotateY(360deg) rotateX(-15deg); } }
+        
+        .box-3d {
+            position: relative;
+            transform-style: preserve-3d;
+            /* Variables overridden via JS */
+            --l: 200; /* Length / X */
+            --h: 150; /* Height / Y */
+            --w: 150; /* Depth / Z */
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .face {
+            position: absolute;
+            top: 50%; left: 50%;
+            background-color: var(--mat-color, theme('colors.kraft'));
+            border: 1px solid rgba(43, 33, 27, 0.15);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.1), inset 0 0 10px rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.05"/></svg>');
+        }
+        
+        /* Flute texture edge on edges */
+        .face::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.05) 100%);
+            pointer-events: none;
+        }
+
+        .face-front  { width: calc(var(--l) * 1px); height: calc(var(--h) * 1px); transform: translate(-50%, -50%) translateZ(calc(var(--w) * 0.5px)); }
+        .face-back   { width: calc(var(--l) * 1px); height: calc(var(--h) * 1px); transform: translate(-50%, -50%) rotateY(180deg) translateZ(calc(var(--w) * 0.5px)); }
+        .face-right  { width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--l) * 0.5px)); }
+        .face-left   { width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--l) * 0.5px)); }
+        .face-top    { width: calc(var(--l) * 1px); height: calc(var(--w) * 1px); transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--h) * 0.5px)); }
+        .face-bottom { width: calc(var(--l) * 1px); height: calc(var(--w) * 1px); transform: translate(-50%, -50%) rotateX(-90deg) translateZ(calc(var(--h) * 0.5px)); }
+
+        /* Flat Dieline State */
+        .box-3d.is-flat .face-front  { transform: translate(-50%, -50%) translateZ(0); }
+        .box-3d.is-flat .face-back   { transform: translate(-50%, calc(-50% - (var(--h) * 1px))) translateZ(0); }
+        .box-3d.is-flat .face-top    { transform: translate(-50%, calc(-50% - (var(--h) * 1px) - (var(--w) * 1px))) translateZ(0); }
+        .box-3d.is-flat .face-bottom { transform: translate(-50%, calc(-50% + (var(--h) * 1px))) translateZ(0); }
+        .box-3d.is-flat .face-right  { transform: translate(calc(-50% + (var(--l) * 0.5px) + (var(--w) * 0.5px)), -50%) translateZ(0); }
+        .box-3d.is-flat .face-left   { transform: translate(calc(-50% - (var(--l) * 0.5px) - (var(--w) * 0.5px)), -50%) translateZ(0); }
+
+        /* Print Placeholder styles */
+        .print-mark { font-family: 'Noto Serif Arabic', serif; font-size: 1.5rem; color: rgba(43,33,27,0.4); opacity: 0; transition: opacity 0.3s; }
+        .has-print .print-mark { opacity: 1; }
+        
+        /* White Material */
+        .mat-white .face { var(--mat-color: #ffffff); background-color: #fcfcfc; }
+
+        /* Swatches */
+        .swatch { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;}
+        .swatch:hover { transform: scale(1.1); }
+        .swatch.active { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px theme('colors.espresso'); }
+        .swatch-kraft { background-color: theme('colors.kraft'); }
+        .swatch-white { background-color: #FFFFFF; }
+
+        /* Range Slider Styling */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: theme('colors.espresso'); cursor: pointer; margin-top: -7px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: theme('colors.cardboard'); }
+
+        /* Slide-over Transitions */
+        .slide-over-backdrop { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .slide-over-backdrop.active { opacity: 1; pointer-events: auto; }
+        .slide-over-panel { transform: translateX(100%); transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); } /* RTL slides from right */
+        .slide-over-panel.active { transform: translateX(0); }
+
+        /* Safe area padding for modern mobile devices (Notch/Home indicator) */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- SECTION 01 — HEADER -->
+    <header class="fixed top-0 w-full z-40 glass-header transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 bg-espresso text-paper flex items-center justify-center rounded-sm rotate-45 group-hover:rotate-0 transition-transform duration-500">
+                    <span class="-rotate-45 group-hover:rotate-0 transition-transform duration-500 font-serif font-bold text-xl block pt-1" id="ui-logo-char">م</span>
+                </div>
+                <h1 class="font-serif text-2xl font-bold text-ink tracking-tight" id="ui-brand-name">[اسم المصنع]</h1>
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#products" class="hover:text-copper transition-colors">المنتجات</a>
+                <a href="#studio" class="hover:text-copper transition-colors">استوديو الصناديق</a>
+                <a href="#quote" class="hover:text-copper transition-colors">اطلب عرض سعر</a>
+            </nav>
+
+            <!-- CTA -->
+            <a href="#" onclick="openWhatsApp('general')" class="hidden md:inline-flex items-center gap-2 bg-espresso text-paper px-5 py-2.5 rounded-full text-sm hover:bg-ink transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                تواصل معنا
+            </a>
+            <a href="#" onclick="openWhatsApp('general')" class="md:hidden text-espresso p-2 bg-ivory rounded-full">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <!-- SECTION 02 — HERO -->
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute inset-0 z-0 opacity-40 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, theme('colors.ivory') 0%, theme('colors.paper') 70%);"></div>
+        
+        <div class="container mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Hero Text -->
+            <div class="text-center lg:text-right max-w-2xl mx-auto lg:mx-0">
+                <p class="text-copper font-medium tracking-widest text-sm mb-4 uppercase" id="ui-hero-tagline">[شعار المصنع]</p>
+                <h2 class="font-serif text-5xl lg:text-7xl font-bold leading-tight text-espresso mb-6 text-balance">
+                    نصنع حلول التغليف التي <span class="text-cardboard">تحمي</span> منتجاتك وتُبرز <span class="italic">هويتها</span>
+                </h2>
+                <p class="text-lg text-ink/70 mb-10 leading-relaxed text-balance">
+                    اكتشف مجموعة متنوعة من حلول الكرتون والتغليف، المصممة بدقة لتلبية احتياجات التعبئة والشحن والعرض التجاري الفاخر.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                    <a href="#products" class="w-full sm:w-auto bg-espresso text-paper px-8 py-4 rounded-sm hover:bg-ink transition-colors text-center font-medium">اكتشف منتجاتنا</a>
+                    <a href="#quote" class="w-full sm:w-auto lux-border bg-transparent text-espresso px-8 py-4 rounded-sm hover:bg-ivory transition-colors text-center font-medium">اطلب عرض سعر</a>
+                </div>
+            </div>
+
+            <!-- Hero 3D Visual -->
+            <div class="h-[400px] lg:h-[600px] w-full relative cursor-move" id="hero-3d-container">
+                <div class="scene-3d">
+                    <div class="box-pivot spin" id="hero-pivot">
+                        <div class="box-3d" style="--l: 240; --w: 180; --h: 120;">
+                            <div class="face face-front"><span class="print-mark font-serif italic text-3xl opacity-30">PREMIUM</span></div>
+                            <div class="face face-back"></div>
+                            <div class="face face-right"></div>
+                            <div class="face face-left"></div>
+                            <div class="face face-top"><span class="print-mark font-serif font-bold text-4xl opacity-40">[الشعار]</span></div>
+                            <div class="face face-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Ambient Shadow -->
+                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-64 h-12 bg-black/10 blur-xl rounded-[100%] pointer-events-none"></div>
+            </div>
+        </div>
+
+        <!-- Product Category Strip -->
+        <div class="absolute bottom-0 w-full lux-border-b bg-paper/90 backdrop-blur-sm z-20 hidden md:block">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-sm font-medium text-ink/60">
+                <span>كرتون مضلع</span>
+                <span class="w-1 h-1 rounded-full bg-copper"></span>
+                <span>كراتين الشحن</span>
+                <span class="w-1 h-1 rounded-full bg-copper"></span>
+                <span>تغليف مخصص</span>
+                <span class="w-1 h-1 rounded-full bg-copper"></span>
+                <span>علب مطبوعة</span>
+                <span class="w-1 h-1 rounded-full bg-copper"></span>
+                <span>صواني كرتون</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 03 — PRODUCTS SHOWCASE -->
+    <section id="products" class="py-24 bg-paper relative z-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div>
+                    <h3 class="font-serif text-4xl lg:text-5xl font-bold text-espresso mb-4">الكتالوج</h3>
+                    <p class="text-ink/60 max-w-md">تصفح تشكيلتنا من الصناديق الكرتونية القياسية والمخصصة، مصممة لأعلى درجات التحمل والجمالية.</p>
+                </div>
+                
+                <!-- Filters -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar" id="category-filters">
+                    <!-- Generated via JS -->
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="product-grid">
+                <!-- Generated via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE-OVER PRODUCT PANEL -->
+    <div id="product-panel-backdrop" class="fixed inset-0 bg-ink/40 z-50 slide-over-backdrop" onclick="closeProductPanel()"></div>
+    <div id="product-panel" class="fixed top-0 right-0 w-full max-w-md h-full bg-paper z-50 slide-over-panel shadow-2xl flex flex-col border-l border-cardboard/20">
+        <div class="p-6 flex items-center justify-between lux-border-b">
+            <h4 class="font-serif text-xl font-bold text-espresso">تفاصيل المنتج</h4>
+            <button onclick="closeProductPanel()" class="w-10 h-10 rounded-full bg-ivory flex items-center justify-center text-ink hover:bg-kraft hover:text-paper transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar" id="panel-content">
+            <!-- Populated via JS -->
+        </div>
+
+        <div class="p-6 bg-ivory/50 lux-border-b mt-auto">
+            <button id="panel-whatsapp-btn" class="w-full bg-whatsapp text-white px-6 py-4 rounded-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                استفسر عن هذا المنتج عبر واتساب
+            </button>
+        </div>
+    </div>
+
+    <!-- SECTION 04 — 3D BOX STUDIO -->
+    <section id="studio" class="py-24 bg-ivory lux-border-b relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            
+            <div class="text-center mb-16">
+                <h3 class="font-serif text-4xl lg:text-5xl font-bold text-espresso mb-4">استوديو الصناديق التفاعلي</h3>
+                <p class="text-ink/60 max-w-2xl mx-auto">صمم الصندوق الخاص بك، حدد المقاسات والخامات، وشاهد النتيجة في بيئة ثلاثية الأبعاد قبل طلب التسعير.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-12 items-start bg-paper rounded-xl shadow-luxury p-8 border border-cardboard/10">
+                
+                <!-- 3D Canvas Area -->
+                <div class="lg:col-span-7 h-[500px] bg-ivory/50 rounded-lg relative overflow-hidden flex flex-col justify-between">
+                    
+                    <div class="absolute top-4 right-4 flex gap-2 z-10">
+                        <span class="bg-paper px-3 py-1 text-xs font-mono text-ink rounded shadow-sm border border-cardboard/10" id="lbl-l">L: 300</span>
+                        <span class="bg-paper px-3 py-1 text-xs font-mono text-ink rounded shadow-sm border border-cardboard/10" id="lbl-w">W: 200</span>
+                        <span class="bg-paper px-3 py-1 text-xs font-mono text-ink rounded shadow-sm border border-cardboard/10" id="lbl-h">H: 150</span>
+                    </div>
+
+                    <div class="flex-1 relative cursor-grab active:cursor-grabbing" id="studio-drag-area">
+                        <div class="scene-3d pt-12">
+                            <div class="box-pivot" id="studio-pivot" style="transform: rotateY(-35deg) rotateX(-15deg);">
+                                <div class="box-3d" id="studio-box" style="--l: 250; --w: 180; --h: 150;">
+                                    <div class="face face-front"><span class="print-mark font-serif font-bold text-3xl">YOUR LOGO</span></div>
+                                    <div class="face face-back"></div>
+                                    <div class="face face-right"></div>
+                                    <div class="face face-left"></div>
+                                    <div class="face face-top"><span class="print-mark font-serif font-bold text-xl opacity-50 text-center">TOP<br>PRINT</span></div>
+                                    <div class="face face-bottom"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-4 left-4 z-10">
+                        <button onclick="toggleBoxState()" id="btn-toggle-box" class="bg-espresso text-paper px-4 py-2 rounded-sm text-sm hover:bg-ink transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                            عرض التصميم المسطح
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="lg:col-span-5 space-y-8">
+                    
+                    <div>
+                        <h4 class="text-sm font-bold text-espresso mb-4 uppercase tracking-wider">الأبعاد (مم)</h4>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-ink/80">الطول (L)</span>
+                                    <span class="font-mono" id="val-l">300 mm</span>
+                                </div>
+                                <input type="range" id="inp-l" min="50" max="600" value="300" oninput="updateStudioBox()">
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-ink/80">العرض (W)</span>
+                                    <span class="font-mono" id="val-w">200 mm</span>
+                                </div>
+                                <input type="range" id="inp-w" min="50" max="500" value="200" oninput="updateStudioBox()">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-ink/80">الارتفاع (H)</span>
+                                    <span class="font-mono" id="val-h">150 mm</span>
+                                </div>
+                                <input type="range" id="inp-h" min="50" max="500" value="150" oninput="updateStudioBox()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lux-border-b"></div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-sm font-bold text-espresso mb-3 uppercase tracking-wider">الخامة</h4>
+                            <div class="flex gap-3">
+                                <div class="swatch swatch-kraft active" onclick="setMaterial('kraft', this)" title="كرافت"></div>
+                                <div class="swatch swatch-white" onclick="setMaterial('white', this)" title="أبيض"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-bold text-espresso mb-3 uppercase tracking-wider">الطباعة</h4>
+                            <select id="inp-print" class="w-full bg-transparent border-b border-cardboard/30 pb-2 text-sm focus:outline-none focus:border-espresso" onchange="updateStudioBox()">
+                                <option value="none">بدون طباعة (سادة)</option>
+                                <option value="demo">معاينة طباعة تجريبية</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <p class="text-xs text-ink/50 leading-relaxed italic">
+                        * المقاسات المعروضة توضيحية. يُرجى تأكيد المقاسات الداخلية (Inner Dimensions) ومتطلبات التصنيع الدقيقة مع المصنع.
+                    </p>
+
+                    <button onclick="sendStudioQuote()" class="w-full bg-whatsapp text-white px-6 py-4 rounded-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                        أرسل مواصفات الصندوق عبر واتساب
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 05 — MATERIALS & PRINTING & PROCESS -->
+    <section class="py-24 bg-paper">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="grid lg:grid-cols-2 gap-16">
+                <!-- Know your board -->
+                <div>
+                    <h3 class="font-serif text-3xl font-bold text-espresso mb-8">تعرف على كفاءة الكرتون</h3>
+                    <div class="bg-ivory/50 rounded-xl p-8 lux-border mb-8">
+                        <!-- SVG Cross Section -->
+                        <svg class="w-full h-24 mb-6" viewBox="0 0 400 100" preserveAspectRatio="none">
+                            <line x1="0" y1="10" x2="400" y2="10" stroke="#8A6A47" stroke-width="4"/>
+                            <path d="M0,50 Q10,10 20,50 T40,50 T60,50 T80,50 T100,50 T120,50 T140,50 T160,50 T180,50 T200,50 T220,50 T240,50 T260,50 T280,50 T300,50 T320,50 T340,50 T360,50 T380,50 T400,50" fill="none" stroke="#C49A6C" stroke-width="3"/>
+                            <line x1="0" y1="90" x2="400" y2="90" stroke="#8A6A47" stroke-width="4"/>
+                        </svg>
+                        
+                        <div class="grid grid-cols-3 gap-4 text-center text-sm font-medium text-ink/70">
+                            <div>الطبقة الخارجية<br>(Liner)</div>
+                            <div>التمويج<br>(Flute)</div>
+                            <div>الطبقة الداخلية<br>(Inner)</div>
+                        </div>
+                    </div>
+
+                    <h4 class="font-bold text-espresso mb-4">أنواع التمويج (Flutes) المتاحة</h4>
+                    <div class="flex flex-wrap gap-2" id="flute-options">
+                        <!-- Generated via JS -->
+                    </div>
+                </div>
+
+                <!-- Process -->
+                <div>
+                    <h3 class="font-serif text-3xl font-bold text-espresso mb-8">آلية العمل والإنتاج</h3>
+                    
+                    <div class="space-y-6 relative before:absolute before:inset-y-0 before:right-6 before:w-px before:bg-cardboard/20">
+                        <div class="relative flex items-start gap-6">
+                            <div class="w-12 h-12 rounded-full bg-paper lux-border flex items-center justify-center font-serif font-bold text-copper z-10 shrink-0">01</div>
+                            <div class="pt-3">
+                                <h5 class="font-bold text-espresso mb-1">استلام متطلبات العميل</h5>
+                                <p class="text-sm text-ink/60">تحديد المقاسات، الأحمال، الغرض من التعبئة، والكميات.</p>
+                            </div>
+                        </div>
+                        <div class="relative flex items-start gap-6">
+                            <div class="w-12 h-12 rounded-full bg-paper lux-border flex items-center justify-center font-serif font-bold text-copper z-10 shrink-0">02</div>
+                            <div class="pt-3">
+                                <h5 class="font-bold text-espresso mb-1">التصميم وتجهيز الهيكل</h5>
+                                <p class="text-sm text-ink/60">رسم المخطط المسطح (Dieline) واختيار نوع الخامة والتمويج الأنسب.</p>
+                            </div>
+                        </div>
+                        <div class="relative flex items-start gap-6">
+                            <div class="w-12 h-12 rounded-full bg-paper lux-border flex items-center justify-center font-serif font-bold text-copper z-10 shrink-0">03</div>
+                            <div class="pt-3">
+                                <h5 class="font-bold text-espresso mb-1">اعتماد العينة</h5>
+                                <p class="text-sm text-ink/60">إنتاج عينة تجريبية بيضاء أو مطبوعة للتأكد من المقاسات والمواصفات.</p>
+                            </div>
+                        </div>
+                        <div class="relative flex items-start gap-6">
+                            <div class="w-12 h-12 rounded-full bg-espresso flex items-center justify-center font-serif font-bold text-paper z-10 shrink-0">04</div>
+                            <div class="pt-3">
+                                <h5 class="font-bold text-espresso mb-1">الإنتاج والتسليم</h5>
+                                <p class="text-sm text-ink/60">بدء الإنتاج الكمي وفق أعلى معايير الجودة والتسليم حسب الجدول المتفق عليه.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Printing & Finishing Options -->
+            <div class="mt-20">
+                <h3 class="font-serif text-3xl font-bold text-espresso mb-8 text-center">الطباعة والتشطيبات الفاخرة</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="printing-options">
+                    <!-- Generated via JS -->
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 06 — GET A QUOTE -->
+    <section id="quote" class="py-24 bg-ink text-paper relative overflow-hidden">
+        <!-- Decor -->
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-espresso/50 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16">
+            
+            <!-- Form -->
+            <div>
+                <h3 class="font-serif text-4xl font-bold mb-4">اطلب عرض سعر</h3>
+                <p class="text-paper/60 mb-10">املأ البيانات الأساسية وسيقوم فريق المبيعات بالتواصل معك في أقرب وقت.</p>
+
+                <form onsubmit="handleQuoteSubmit(event)" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm text-paper/70 mb-2">الاسم</label>
+                            <input type="text" id="form-name" required class="w-full bg-transparent border-b border-paper/20 pb-2 text-paper focus:outline-none focus:border-copper transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-paper/70 mb-2">اسم الشركة (اختياري)</label>
+                            <input type="text" id="form-company" class="w-full bg-transparent border-b border-paper/20 pb-2 text-paper focus:outline-none focus:border-copper transition-colors">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-paper/70 mb-2">نوع المنتج / الاهتمام</label>
+                        <select id="form-product" class="w-full bg-transparent border-b border-paper/20 pb-2 text-paper focus:outline-none focus:border-copper transition-colors [&>option]:text-ink">
+                            <option value="كرتون مضلع للشحن">كرتون مضلع للشحن</option>
+                            <option value="علب مطبوعة فاخرة">علب مطبوعة فاخرة</option>
+                            <option value="تغليف مخصص">تغليف مخصص (Custom)</option>
+                            <option value="غير متأكد - احتاج استشارة">غير متأكد - احتاج استشارة</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm text-paper/70 mb-2">المقاسات التقريبية</label>
+                            <input type="text" id="form-dims" placeholder="مثال: 30x20x15 سم" class="w-full bg-transparent border-b border-paper/20 pb-2 text-paper focus:outline-none focus:border-copper transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-paper/70 mb-2">الكمية المطلوبة</label>
+                            <input type="number" id="form-qty" placeholder="مثال: 5000" required class="w-full bg-transparent border-b border-paper/20 pb-2 text-paper focus:outline-none focus:border-copper transition-colors">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-paper/70 mb-2">ملاحظات إضافية</label>
+                        <textarea id="form-notes" rows="3" class="w-full bg-transparent border-b border-paper/20 pb-2 text-paper focus:outline-none focus:border-copper transition-colors resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-copper text-paper px-6 py-4 rounded-sm font-bold hover:bg-[#A3693A] transition-colors flex items-center justify-center gap-2 mt-8">
+                        إرسال الطلب عبر واتساب
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="lg:pl-16">
+                <div class="h-full border-l border-paper/10 pl-10 flex flex-col justify-center space-y-12">
+                    
+                    <div>
+                        <h5 class="text-paper/50 text-sm font-bold uppercase tracking-widest mb-2">رقم الهاتف</h5>
+                        <p class="font-mono text-xl" id="ui-phone">[رقم الهاتف]</p>
+                    </div>
+
+                    <div>
+                        <h5 class="text-paper/50 text-sm font-bold uppercase tracking-widest mb-2">البريد الإلكتروني</h5>
+                        <p class="font-mono text-xl text-copper" id="ui-email">[البريد الإلكتروني]</p>
+                    </div>
+
+                    <div>
+                        <h5 class="text-paper/50 text-sm font-bold uppercase tracking-widest mb-2">موقع المصنع</h5>
+                        <p class="text-lg leading-relaxed mb-4" id="ui-address">[عنوان المصنع]<br>[المدينة]</p>
+                        <a href="#" id="ui-maplink" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm text-copper hover:text-white transition-colors">
+                            عرض على خرائط جوجل
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#15120F] text-paper/40 py-8 text-center text-sm border-t border-paper/10">
+        <p>© <span id="current-year"></span> <span id="footer-brand"></span>. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Mobile Bottom Nav (Visible only on very small screens < md) -->
+    <div class="md:hidden fixed bottom-0 w-full bg-paper border-t border-cardboard/20 z-40 flex justify-around py-3 px-2 text-xs font-medium pb-safe">
+        <a href="#products" class="flex flex-col items-center gap-1 text-ink/70 hover:text-espresso">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            المنتجات
+        </a>
+        <a href="#studio" class="flex flex-col items-center gap-1 text-ink/70 hover:text-espresso">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
+            الاستوديو
+        </a>
+        <a href="#quote" class="flex flex-col items-center gap-1 text-ink/70 hover:text-espresso">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            التسعير
+        </a>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        /**
+         * ==========================================
+         * 1. CONFIGURATION OBJECT (EDIT DATA HERE)
+         * ==========================================
+         */
+        const CONFIG = {
+            brand: {
+                name: "أرورا باك", // [اسم المصنع]
+                tagline: "صناعة التغليف الفاخر",
+                whatsappNumber: "201000000000", // [رقم الواتساب] - Replace with real number including country code
+                email: "info@aurorapack.com", // [البريد الإلكتروني]
+                phone: "+20 100 000 0000", // [رقم الهاتف]
+                address: "المنطقة الصناعية الثالثة، مجمع المصانع", // [عنوان المصنع]
+                city: "القاهرة، مصر", // [المدينة]
+                mapLink: "https://maps.google.com", // Link to location
+            },
+            categories: [
+                { id: 'all', name: 'الكل' },
+                { id: 'corrugated', name: 'الكرتون المضلع' },
+                { id: 'shipping', name: 'كراتين الشحن والتعبئة' },
+                { id: 'printed', name: 'علب الكرتون المطبوعة' },
+                { id: 'custom', name: 'التغليف المخصص' },
+                { id: 'folding', name: 'علب الفولدنج كارتون' },
+                { id: 'trays', name: 'صواني الكرتون' },
+                { id: 'sheets', name: 'ألواح الكرتون' },
+                { id: 'other', name: 'منتجات كرتونية أخرى' }
+            ],
+            // Only confirmed options will render on the site
+            printingOptions: [
+                { name: 'طباعة فليكسو (Flexo)', confirmed: true, type: 'basic' },
+                { name: 'طباعة أوفست (Offset)', confirmed: true, type: 'premium' },
+                { name: 'طباعة رقمية (Digital)', confirmed: true, type: 'premium' }
+            ],
+            finishingOptions: [
+                { name: 'سلوفان مط (Matte Lamination)', confirmed: true },
+                { name: 'سلوفان لامع (Gloss Lamination)', confirmed: true },
+                { name: 'طباعة بارزة (Embossing)', confirmed: true },
+                { name: 'بصمة حرارية (Hot Foil)', confirmed: true },
+                { name: 'سبوت يو في (Spot UV)', confirmed: true }
+            ],
+            fluteTypes: [
+                { id: 'E', desc: 'تمويج دقيق 1.5 مم (للعلب الصغيرة والمطبوعة)' },
+                { id: 'B', desc: 'تمويج 3.0 مم (للتغليف العام وعلب الشحن)' },
+                { id: 'C', desc: 'تمويج 4.0 مم (شحن وأوزان متوسطة)' },
+                { id: 'BC', desc: 'دبل وول 7.0 مم (أوزان ثقيلة وحماية عالية)' }
+            ],
+            products: [
+                {
+                    id: 'p1',
+                    name: "صندوق شحن قياسي RSC",
+                    categoryId: 'shipping',
+                    description: "صندوق كرتون مضلع كلاسيكي ذو أغطية علوية وسفلية متقابلة. الحل الاقتصادي والأكثر شيوعاً للشحن والتخزين.",
+                    material: "كرافت بني (Kraft Liner)",
+                    flute: "C-Flute / B-Flute",
+                    styleType: "RSC (Regular Slotted Carton)",
+                    image: "https://placehold.co/800x600/C49A6C/2B211B?text=RSC+Box" // Sample Image
+                },
+                {
+                    id: 'p2',
+                    name: "علبة بريد (Mailer Box)",
+                    categoryId: 'printed',
+                    description: "علبة أنيقة تُغلق ذاتياً وتوفر تجربة فتح (Unboxing) فاخرة. مثالية لمتاجر التجارة الإلكترونية والمنتجات الفاخرة.",
+                    material: "دوبلكس مبطن بكرافت / أبيض",
+                    flute: "E-Flute",
+                    styleType: "Roll End Tuck Top (RETT)",
+                    printOptions: "أوفست / رقمي",
+                    image: "https://placehold.co/800x600/EDE3D5/2B211B?text=Mailer+Box"
+                },
+                {
+                    id: 'p3',
+                    name: "صندوق دبل وول للأوزان الثقيلة",
+                    categoryId: 'corrugated',
+                    description: "صندوق بخمس طبقات يوفر حماية قصوى وقدرة تحمل عالية للأوزان الثقيلة والظروف القاسية.",
+                    material: "كرافت عالي الجودة (High ECT)",
+                    flute: "BC-Flute (Double Wall)",
+                    styleType: "RSC Heavy Duty",
+                    image: "https://placehold.co/800x600/8A6A47/F6F1E9?text=Double+Wall"
+                },
+                {
+                    id: 'p4',
+                    name: "علب فولدنج فاخرة (Folding Carton)",
+                    categoryId: 'folding',
+                    description: "علب خفيفة الوزن ذات جودة طباعة استثنائية، تستخدم في تغليف مستحضرات التجميل والأدوية والصناعات الغذائية.",
+                    material: "ورق مقوى (FBB / SBS)",
+                    flute: "بدون تمويج (Solid Board)",
+                    styleType: "Straight / Reverse Tuck End",
+                    printOptions: "أوفست 6 ألوان مع تشطيبات فاخرة",
+                    image: "https://placehold.co/800x600/F6F1E9/2B211B?text=Folding+Carton"
+                },
+                {
+                    id: 'p5',
+                    name: "صينية كرتون (Tray)",
+                    categoryId: 'trays',
+                    description: "تصميم مفتوح من الأعلى يسهل عرض المنتجات على الرفوف وتكديسها أثناء النقل السريع.",
+                    material: "كرافت مبطن / تيست لاينر",
+                    flute: "B-Flute",
+                    styleType: "Die-cut Tray",
+                    image: "https://placehold.co/800x600/C49A6C/2B211B?text=Carton+Tray"
+                },
+                {
+                    id: 'p6',
+                    name: "علبة بغطاء منفصل (Telescope Box)",
+                    categoryId: 'custom',
+                    description: "تصميم فاخر يتكون من قاعدة وغطاء علوي منفصل. يضيف قيمة جمالية وتجربة مميزة لمنتجات الهدايا.",
+                    material: "كرافت أبيض عالي النقاء",
+                    flute: "E-Flute",
+                    styleType: "Full Telescope",
+                    printOptions: "أوفست + بصمة حرارية",
+                    image: "https://placehold.co/800x600/EDE3D5/2B211B?text=Telescope+Box"
+                },
+                {
+                    id: 'p7',
+                    name: "ألواح كرتون مضلع (Sheets)",
+                    categoryId: 'sheets',
+                    description: "ألواح كرتونية مسطحة تستخدم كفواصل بين المنتجات داخل الصناديق أو لتصنيع العبوات المخصصة.",
+                    material: "مختلف الخامات",
+                    flute: "B / C / E Flute",
+                    styleType: "Sheet Board",
+                    image: "https://placehold.co/800x600/8A6A47/F6F1E9?text=Cardboard+Sheets"
+                },
+                {
+                    id: 'p8',
+                    name: "مقسمات وحواجز داخلية",
+                    categoryId: 'other',
+                    description: "حواجز كرتونية مصممة خصيصاً لحماية المنتجات الهشة (كالزجاج) ومنع احتكاكها أثناء الشحن.",
+                    material: "كرافت أو تيست لاينر",
+                    flute: "B-Flute / E-Flute",
+                    styleType: "Interlocking Partitions",
+                    image: "https://placehold.co/800x600/C49A6C/2B211B?text=Partitions"
+                }
+            ]
+        };
+
+        /**
+         * ==========================================
+         * 2. INITIALIZATION & UI BINDING
+         * ==========================================
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set Brand Info
+            document.getElementById('ui-brand-name').textContent = CONFIG.brand.name;
+            document.getElementById('ui-logo-char').textContent = CONFIG.brand.name.charAt(0);
+            document.getElementById('ui-hero-tagline').textContent = CONFIG.brand.tagline;
+            document.getElementById('ui-phone').textContent = CONFIG.brand.phone;
+            document.getElementById('ui-email').textContent = CONFIG.brand.email;
+            document.getElementById('ui-address').innerHTML = `${CONFIG.brand.address}<br>${CONFIG.brand.city}`;
+            document.getElementById('ui-maplink').href = CONFIG.brand.mapLink;
+            document.getElementById('footer-brand').textContent = CONFIG.brand.name;
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            renderFilters();
+            renderProducts('all');
+            renderMaterialsAndPrinting();
+            
+            // Mouse Parallax for Hero 3D Box (Desktop Only)
+            const heroContainer = document.getElementById('hero-3d-container');
+            const heroPivot = document.getElementById('hero-pivot');
+            if(window.innerWidth > 768) {
+                heroContainer.addEventListener('mousemove', (e) => {
+                    const rect = heroContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    // Remove spin class on interact
+                    heroPivot.classList.remove('spin');
+                    heroPivot.style.transform = `rotateY(${x * 0.2}deg) rotateX(${-15 + -y * 0.1}deg)`;
+                });
+                heroContainer.addEventListener('mouseleave', () => {
+                    heroPivot.classList.add('spin');
+                    heroPivot.style.transform = ''; // reset to animation
+                });
+            }
+        });
+
+        /**
+         * ==========================================
+         * 3. PRODUCTS RENDER & LOGIC
+         * ==========================================
+         */
+        let currentActiveCategory = 'all';
+
+        function renderFilters() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = '';
+            CONFIG.categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors border ${cat.id === currentActiveCategory ? 'bg-espresso text-paper border-espresso' : 'bg-transparent text-ink/70 border-cardboard/30 hover:border-espresso hover:text-espresso'}`;
+                btn.textContent = cat.name;
+                btn.onclick = () => {
+                    currentActiveCategory = cat.id;
+                    renderFilters(); // Re-render to update active classes
+                    renderProducts(cat.id);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderProducts(categoryId) {
+            const container = document.getElementById('product-grid');
+            container.innerHTML = '';
+            
+            const filtered = categoryId === 'all' 
+                ? CONFIG.products 
+                : CONFIG.products.filter(p => p.categoryId === categoryId);
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-ink/50">لا توجد منتجات في هذا القسم حالياً.</div>`;
+                return;
+            }
+
+            filtered.forEach(product => {
+                const catName = CONFIG.categories.find(c => c.id === product.categoryId)?.name || '';
+                
+                const card = document.createElement('div');
+                card.className = "group cursor-pointer bg-paper hover:bg-ivory transition-colors rounded-lg overflow-hidden border border-cardboard/10 hover:border-cardboard/30 hover:shadow-luxury";
+                card.onclick = () => openProductPanel(product.id);
+                
+                card.innerHTML = `
+                    <div class="aspect-[4/3] bg-ivory/50 relative overflow-hidden p-6 flex items-center justify-center">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover rounded shadow-sm group-hover:scale-105 transition-transform duration-700" loading="lazy">
+                        <div class="absolute inset-0 bg-espresso/0 group-hover:bg-espresso/5 transition-colors duration-500"></div>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-xs font-bold text-copper mb-2 uppercase tracking-wide">${catName}</div>
+                        <h4 class="font-serif text-xl font-bold text-espresso mb-2 line-clamp-1">${product.name}</h4>
+                        <p class="text-sm text-ink/60 line-clamp-2">${product.description}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /**
+         * ==========================================
+         * 4. SLIDE-OVER PANEL LOGIC
+         * ==========================================
+         */
+        const panel = document.getElementById('product-panel');
+        const backdrop = document.getElementById('product-panel-backdrop');
+        const panelContent = document.getElementById('panel-content');
+        const panelWaBtn = document.getElementById('panel-whatsapp-btn');
+
+        function openProductPanel(productId) {
+            const product = CONFIG.products.find(p => p.id === productId);
+            if(!product) return;
+
+            // Populate Data
+            panelContent.innerHTML = `
+                <div class="aspect-square bg-ivory/50 rounded-lg mb-6 overflow-hidden border border-cardboard/10">
+                    <img src="${product.image}" class="w-full h-full object-cover" alt="${product.name}">
+                </div>
+                <h3 class="font-serif text-3xl font-bold text-espresso mb-2">${product.name}</h3>
+                <p class="text-ink/70 text-sm leading-relaxed mb-8">${product.description}</p>
+                
+                <div class="space-y-4">
+                    ${product.styleType ? `<div class="flex flex-col border-b border-cardboard/20 pb-3"><span class="text-xs text-ink/50 uppercase">نوع التصميم (Style)</span><span class="font-medium mt-1">${product.styleType}</span></div>` : ''}
+                    ${product.material ? `<div class="flex flex-col border-b border-cardboard/20 pb-3"><span class="text-xs text-ink/50 uppercase">الخامة المقترحة</span><span class="font-medium mt-1">${product.material}</span></div>` : ''}
+                    ${product.flute ? `<div class="flex flex-col border-b border-cardboard/20 pb-3"><span class="text-xs text-ink/50 uppercase">نوع التمويج (Flute)</span><span class="font-mono mt-1">${product.flute}</span></div>` : ''}
+                    ${product.printOptions ? `<div class="flex flex-col border-b border-cardboard/20 pb-3"><span class="text-xs text-ink/50 uppercase">خيارات الطباعة المتاحة</span><span class="font-medium mt-1">${product.printOptions}</span></div>` : ''}
+                </div>
+            `;
+
+            // Setup WhatsApp button
+            panelWaBtn.onclick = () => {
+                const text = `مرحباً، أود الاستفسار عن المنتج: ${product.name}\nالكود: ${product.id}\nالنوع: ${product.styleType || 'غير محدد'}`;
+                openWhatsAppRaw(text);
+            };
+
+            // Show Panel
+            backdrop.classList.add('active');
+            panel.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProductPanel() {
+            backdrop.classList.remove('active');
+            panel.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        /**
+         * ==========================================
+         * 5. 3D BOX STUDIO LOGIC
+         * ==========================================
+         */
+        const studioBox = document.getElementById('studio-box');
+        const inpL = document.getElementById('inp-l');
+        const inpW = document.getElementById('inp-w');
+        const inpH = document.getElementById('inp-h');
+        
+        const valL = document.getElementById('val-l');
+        const valW = document.getElementById('val-w');
+        const valH = document.getElementById('val-h');
+        
+        const lblL = document.getElementById('lbl-l');
+        const lblW = document.getElementById('lbl-w');
+        const lblH = document.getElementById('lbl-h');
+
+        const inpPrint = document.getElementById('inp-print');
+        let isBoxFlat = false;
+        let currentMaterial = 'kraft';
+
+        function updateStudioBox() {
+            // The inputs are real physical millimeters.
+            // We scale them down so they fit nicely in the 500px height view.
+            const scaleFactor = 0.6; 
+            
+            const l = inpL.value;
+            const w = inpW.value;
+            const h = inpH.value;
+
+            // Update Labels
+            valL.textContent = `${l} mm`;
+            valW.textContent = `${w} mm`;
+            valH.textContent = `${h} mm`;
+            
+            lblL.textContent = `L: ${l}`;
+            lblW.textContent = `W: ${w}`;
+            lblH.textContent = `H: ${h}`;
+
+            // Update CSS Vars for dimensions
+            studioBox.style.setProperty('--l', l * scaleFactor);
+            studioBox.style.setProperty('--w', w * scaleFactor);
+            studioBox.style.setProperty('--h', h * scaleFactor);
+
+            // Print overlay
+            if(inpPrint.value === 'demo') {
+                studioBox.classList.add('has-print');
+            } else {
+                studioBox.classList.remove('has-print');
+            }
+        }
+
+        function setMaterial(mat, el) {
+            currentMaterial = mat;
+            // Update active state on swatches
+            document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Update Box Class
+            if(mat === 'white') {
+                studioBox.classList.add('mat-white');
+            } else {
+                studioBox.classList.remove('mat-white');
+            }
+        }
+
+        function toggleBoxState() {
+            isBoxFlat = !isBoxFlat;
+            const btn = document.getElementById('btn-toggle-box');
+            if(isBoxFlat) {
+                studioBox.classList.add('is-flat');
+                document.getElementById('studio-pivot').style.transform = 'rotateY(0deg) rotateX(0deg) scale(0.8)';
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg> إغلاق وتجميع الصندوق`;
+            } else {
+                studioBox.classList.remove('is-flat');
+                document.getElementById('studio-pivot').style.transform = 'rotateY(-35deg) rotateX(-15deg)';
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg> عرض التصميم المسطح`;
+            }
+        }
+
+        // Add mouse drag rotation to Studio Box
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotation = { x: -15, y: -35 }; // initial rotation
+
+        const dragArea = document.getElementById('studio-drag-area');
+        const studioPivot = document.getElementById('studio-pivot');
+
+        dragArea.addEventListener('mousedown', (e) => {
+            if(isBoxFlat) return; // Don't allow rotation in flat mode
+            isDragging = true;
+            previousMousePosition = { x: e.offsetX, y: e.offsetY };
+        });
+
+        dragArea.addEventListener('mousemove', (e) => {
+            if (isDragging && !isBoxFlat) {
+                const deltaMove = {
+                    x: e.offsetX - previousMousePosition.x,
+                    y: e.offsetY - previousMousePosition.y
+                };
+
+                rotation.y += deltaMove.x * 0.5;
+                rotation.x -= deltaMove.y * 0.5;
+
+                // Clamp X rotation to avoid flipping completely
+                rotation.x = Math.max(-90, Math.min(90, rotation.x));
+
+                studioPivot.style.transform = `rotateY(${rotation.y}deg) rotateX(${rotation.x}deg)`;
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            }
+        });
+
+        document.addEventListener('mouseup', () => { isDragging = false; });
+        dragArea.addEventListener('mouseleave', () => { isDragging = false; });
+        
+        // Touch support for mobile dragging
+        dragArea.addEventListener('touchstart', (e) => {
+             if(isBoxFlat) return;
+             isDragging = true;
+             previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }, {passive: true});
+        
+        dragArea.addEventListener('touchmove', (e) => {
+            if (isDragging && !isBoxFlat) {
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousMousePosition.x,
+                    y: e.touches[0].clientY - previousMousePosition.y
+                };
+                rotation.y += deltaMove.x * 0.5;
+                rotation.x -= deltaMove.y * 0.5;
+                rotation.x = Math.max(-90, Math.min(90, rotation.x));
+                studioPivot.style.transform = `rotateY(${rotation.y}deg) rotateX(${rotation.x}deg)`;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+        }, {passive: true});
+
+
+        function sendStudioQuote() {
+            const text = `طلب تسعير تصميم مخصص من الاستوديو:\n- الطول: ${inpL.value} مم\n- العرض: ${inpW.value} مم\n- الارتفاع: ${inpH.value} مم\n- الخامة: ${currentMaterial === 'kraft' ? 'كرافت' : 'أبيض'}\n- الطباعة: ${inpPrint.value === 'none' ? 'بدون' : 'مطلوب طباعة'}`;
+            openWhatsAppRaw(text);
+        }
+
+        /**
+         * ==========================================
+         * 6. MATERIALS & PRINTING RENDER
+         * ==========================================
+         */
+        function renderMaterialsAndPrinting() {
+            const flutesContainer = document.getElementById('flute-options');
+            CONFIG.fluteTypes.forEach(f => {
+                flutesContainer.innerHTML += `<div class="bg-paper border border-cardboard/20 px-3 py-2 rounded-sm text-sm"><span class="font-bold text-copper">${f.id}</span> - <span class="text-ink/70">${f.desc}</span></div>`;
+            });
+
+            const printContainer = document.getElementById('printing-options');
+            [...CONFIG.printingOptions, ...CONFIG.finishingOptions].filter(o => o.confirmed).forEach(opt => {
+                printContainer.innerHTML += `
+                    <div class="bg-ivory/30 border border-cardboard/10 p-4 text-center flex flex-col items-center justify-center aspect-square rounded hover:bg-paper transition-colors">
+                        <div class="w-12 h-12 rounded-full border border-cardboard/30 mb-3 bg-gradient-to-br from-paper to-ivory flex items-center justify-center shadow-sm">
+                            <div class="w-8 h-8 rounded-full border border-cardboard/10 opacity-50"></div>
+                        </div>
+                        <h6 class="font-bold text-espresso text-sm leading-snug">${opt.name}</h6>
+                    </div>
+                `;
+            });
+        }
+
+        /**
+         * ==========================================
+         * 7. WHATSAPP & FORM LOGIC
+         * ==========================================
+         */
+        function openWhatsAppRaw(text) {
+            const url = `https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+
+        function openWhatsApp(type) {
+            let text = "مرحباً، أود الاستفسار عن خدمات وحلول التغليف لديكم.";
+            openWhatsAppRaw(text);
+        }
+
+        function handleQuoteSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('form-name').value;
+            const company = document.getElementById('form-company').value;
+            const product = document.getElementById('form-product').value;
+            const dims = document.getElementById('form-dims').value;
+            const qty = document.getElementById('form-qty').value;
+            const notes = document.getElementById('form-notes').value;
+
+            let text = `طلب تسعير جديد من الموقع:\n\nالاسم: ${name}\nالشركة: ${company || 'غير محدد'}\nالمنتج: ${product}\nالمقاسات: ${dims || 'غير محدد'}\nالكمية: ${qty}\nملاحظات إضافية: ${notes || 'لا يوجد'}`;
+            
+            openWhatsAppRaw(text);
+        }
+
+    </script>
+</body>
+</html>
